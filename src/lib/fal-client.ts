@@ -16,9 +16,10 @@ const NANO_PATH = "fal-ai/nano-banana-2/edit"; // auto-draw the camera path
 const VISION = "openrouter/router/vision"; // read the path + scene
 const LLM = "openrouter/router"; // write the video prompt
 
-/* OpenRouter model slugs. Vision-capable model for the analysis step. */
-const VISION_MODEL = "google/gemini-2.5-flash";
-const LLM_MODEL = "google/gemini-2.5-flash";
+/* OpenRouter model slugs. Claude Sonnet 4.5 is multimodal, so it handles both
+   the vision path-read and the prompt-writing step. */
+const VISION_MODEL = "anthropic/claude-sonnet-4.5";
+const LLM_MODEL = "anthropic/claude-sonnet-4.5";
 
 export class MissingKeyError extends Error {
   constructor() {

@@ -1,0 +1,124 @@
+{
+  "name": "fal-droneshot-auto",
+  "title": "Drone Shot (Auto)",
+  "contents": {
+    "name": "workflow",
+    "nodes": {
+      "node-path": {
+        "type": "run",
+        "id": "node-path",
+        "depends": ["input"],
+        "app": "fal-ai/nano-banana-2/edit",
+        "input": {
+          "prompt": "Overlay a single smooth, THIN, semi-transparent red drone flight-path line on this aerial photo — a delicate, fine guide line like a subtle planning diagram, NOT a thick or bold stroke. The line should start in the foreground and sweep naturally through the most cinematic part of the scene toward a focal point in the distance, curving gently rather than running straight. Place EXACTLY 4 small, unobtrusive red circular waypoint markers along the line, evenly spaced, each containing the white numeral 1, 2, 3 or 4 in order from start to end (marker 1 at the beginning, marker 4 at the end). Keep the markers and line small and faint so they barely obscure the photo. Keep the underlying photograph completely unchanged — only add the faint red path and the four small numbered markers.",
+          "image_urls": ["$input.image_url"],
+          "aspect_ratio": "auto",
+          "resolution": "2K",
+          "num_images": 1,
+          "output_format": "png"
+        }
+      },
+      "node-vision": {
+        "type": "run",
+        "id": "node-vision",
+        "depends": ["node-path"],
+        "app": "openrouter/router/vision",
+        "input": {
+          "model": "anthropic/claude-sonnet-4.5",
+          "system_prompt": "You are an aerial-cinematography analyst. You are shown a photo with a hand-drawn line and 4 numbered waypoint markers (1, 2, 3, 4 in order from start to end) overlaid on it. That line is the flight path of the drone CAMERA itself moving through the scene — the camera is the drone (first-person aerial view); the drone aircraft is never in the shot. Report, in 4-6 tight sentences: (1) what the scene is; (2) the trajectory the line traces, broken down waypoint-by-waypoint — what is at waypoint 1, then how the line moves to waypoint 2 (direction, curve, altitude change), then to waypoint 3, then to waypoint 4, naming the look-target at each (foreground subject, midground feature, focal point, distant background); (3) implied speed changes. Translate the line and the numbered waypoints into camera movement — never describe the drawn line or numbers as part of the scene itself.",
+          "prompt": "Read the drone flight-path overlay (with its 4 numbered waypoints) and describe the scene and the exact camera trajectory from waypoint 1 to 4.",
+          "image_urls": ["$node-path.images.0.url"],
+          "temperature": 0.4
+        }
+      },
+      "node-llm": {
+        "type": "run",
+        "id": "node-llm",
+        "depends": ["node-vision"],
+        "app": "openrouter/router",
+        "input": {
+          "model": "anthropic/claude-sonnet-4.5",
+          "system_prompt": "You write prompts for image-to-video models, specialized in drone and aerial cinematography. Given a scene analysis and a drone camera path with 4 numbered waypoints (1→2→3→4), output ONE vivid cinematic motion description (max 120 words). CRITICAL: the camera ITSELF is the drone — a smooth first-person aerial point of view that flies along the path; the drone or aircraft NEVER appears in the shot (no drone body, propellers, or shadow). PACING: the video is 10 seconds long. The camera MUST traverse the ENTIRE path within 10 seconds, reaching each numbered waypoint by its time slice. Split the run into 4 equal 2.5-second phases with EXPLICIT time-stamped instructions, e.g. \"0–2.5s: glide forward and reach waypoint 1; 2.5–5s: bank toward waypoint 2; 5–7.5s: move to waypoint 3; 7.5–10s: pull back and settle at waypoint 4.\" Use concrete camera verbs (push in, glide, bank, orbit, ascend, descend, reveal, pull back) and add brief easing/speed notes. Preserve every real subject with natural parallax, consistent lighting and stable, non-warping geometry; do not invent new objects, text, people, or scene changes. Output ONLY the motion description — no framing preamble, no quotes, no markdown.",
+          "prompt": "$node-vision.output",
+          "temperature": 0.7
+        }
+      },
+      "node-prompt": {
+        "type": "run",
+        "id": "node-prompt",
+        "depends": ["node-llm"],
+        "app": "fal-ai/workflow-utilities/merge-text",
+        "input": {
+          "texts": [
+            "Create one continuous, ultra-realistic first-person FPV aerial drone shot from this still image. The CAMERA itself is the aircraft — film entirely from a first-person aerial point of view, as if mounted on the nose of the drone. Never show a drone, quadcopter, helicopter, airplane, propellers, rotors, or any flying vehicle in the frame, and never show its shadow on the ground. There is no aircraft visible anywhere — only the scene seen from the moving camera.\n\nMove the camera smoothly through the scene along the trajectory described below, in one continuous cinematic take:",
+            "$node-llm.output",
+            "Ultra-realistic FPV movement, cinematic speed ramps, realistic inertia, strong motion continuity, grounded aerial realism, no cuts, no duplicated buildings, no distortion, no text, no watermark.",
+            "Avoid: low quality, blurry, low resolution, pixelated; the drone, quadcopter or any aircraft visible in frame; drone propellers; drone shadow on the ground; visible red flight-path line, guide lines, drawn path overlays, arrows or waypoint markers; warping, morphing or melting buildings; bending or distorted architecture; jittery, shaky or unstable camera; abrupt jump cuts or teleporting motion; objects sliding or floating unnaturally; broken perspective; smeared motion blur; frame flicker or strobing; duplicated or ghosted objects; deformed faces or limbs; extra people or vehicles appearing; watermark, text, captions or logos; cartoonish or physically impossible movement."
+          ],
+          "separator": "\n\n"
+        }
+      },
+      "node-video": {
+        "type": "run",
+        "id": "node-video",
+        "depends": ["input", "node-prompt"],
+        "app": "bytedance/seedance-2.0/image-to-video",
+        "input": {
+          "image_url": "$input.image_url",
+          "prompt": "$node-prompt.text",
+          "resolution": "1080p",
+          "aspect_ratio": "auto",
+          "duration": "10",
+          "generate_audio": false
+        }
+      },
+      "output": {
+        "type": "display",
+        "id": "output",
+        "depends": ["node-video", "node-path"],
+        "input": {},
+        "fields": {
+          "video": "$node-video.video.url",
+          "path_frame": "$node-path.images.0.url"
+        }
+      }
+    },
+    "output": {
+      "video": "$node-video.video.url",
+      "path_frame": "$node-path.images.0.url"
+    },
+    "schema": {
+      "input": {
+        "image_url": {
+          "name": "image_url",
+          "label": "Reference image",
+          "type": "string",
+          "description": "The still photo to turn into an FPV drone shot.",
+          "required": true,
+          "modelId": "node-path"
+        }
+      },
+      "output": {
+        "video": {
+          "name": "video",
+          "label": "Drone shot video",
+          "type": "string"
+        },
+        "path_frame": {
+          "name": "path_frame",
+          "label": "Annotated flight path",
+          "type": "string"
+        }
+      }
+    },
+    "version": "1",
+    "metadata": {
+      "input": { "position": { "x": 0, "y": 0 } },
+      "description": "Photo to FPV drone shot: Nano Banana 2 sketches a camera flight path, OpenRouter Vision reads it, an LLM writes the timed camera motion, the prompt is composed deterministically, and Seedance 2.0 animates the clean frame at 1080p, auto aspect ratio, 10s."
+    }
+  },
+  "is_public": true,
+  "user_id": "",
+  "user_nickname": "",
+  "created_at": ""
+}

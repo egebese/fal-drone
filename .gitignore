@@ -1,0 +1,16 @@
+/node_modules
+/.next
+/out
+/build
+next-env.d.ts
+.DS_Store
+*.tsbuildinfo
+
+# Environment — never commit real keys (the app is BYOK, no server key needed)
+.env
+.env.*
+!.env.example
+
+# Local AI-agent / assistant notes (not part of the public project)
+AGENTS.md
+CLAUDE.md

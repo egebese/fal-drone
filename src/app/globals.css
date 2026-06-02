@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  background: #050505;
+  color: #fafafa;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Liquid Glass system
+   Multi-layer backdrop stack + specular highlight + inner rim +
+   outer shadow + breathing shimmer + fine refraction grain.
+   Works in Chrome / Safari with no SVG displacement dependency.
+   ───────────────────────────────────────────────────────────── */
+
+.lg {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.05) 45%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  backdrop-filter: blur(28px) saturate(210%) brightness(1.02);
+  -webkit-backdrop-filter: blur(28px) saturate(210%) brightness(1.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.18),
+    0 18px 48px -14px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.lg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      130% 85% at 18% 0%,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.05) 38%,
+      transparent 70%
+    ),
+    radial-gradient(
+      80% 60% at 90% 100%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 60%
+    );
+  mix-blend-mode: screen;
+  z-index: 0;
+}
+
+.lg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 42%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 58%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: lg-shimmer 9s ease-in-out infinite;
+}
+
+.lg > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes lg-shimmer {
+  0% {
+    background-position: -60% 0;
+    opacity: 0.35;
+  }
+  50% {
+    background-position: 160% 0;
+    opacity: 0.7;
+  }
+  100% {
+    background-position: -60% 0;
+    opacity: 0.35;
+  }
+}
+
+/* Pill variant — brighter top highlight, meant for small round elements. */
+.lg-pill {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.08) 55%,
+    rgba(255, 255, 255, 0.14) 100%
+  );
+  backdrop-filter: blur(22px) saturate(200%);
+  -webkit-backdrop-filter: blur(22px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+    0 6px 18px -6px rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  isolation: isolate;
+}
+
+/* Dark variant for deeper panels (prompt bar, dialogs). */
+.lg-dark {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(18, 18, 26, 0.55) 0%,
+    rgba(10, 10, 20, 0.45) 40%,
+    rgba(5, 5, 15, 0.5) 100%
+  );
+  backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
+  -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    0 22px 60px -18px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.lg-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 80% at 15% -10%,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.03) 35%,
+      transparent 68%
+    );
+  z-index: 0;
+}
+
+.lg-dark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 42%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 58%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: lg-shimmer 12s ease-in-out infinite;
+}
+
+.lg-dark > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Solid white pill (top-right Sign in style) with subtle liquid feel. */
+.lg-solid {
+  background: linear-gradient(180deg, #ffffff 0%, #f3f3f3 100%);
+  color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+    0 8px 20px -6px rgba(0, 0, 0, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Utilities */
+.shimmer-slow {
+  animation: lg-shimmer 14s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spin-slow { animation: spin-slow 2s linear infinite; }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fade-in 0.4s ease-out both; }
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.005); }
+}
+.breathe { animation: breathe 3.5s ease-in-out infinite; }
+
+/* Custom scrollbars for dark panels. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.scroll-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+textarea { font-family: inherit; }
+textarea::placeholder { color: rgba(255, 255, 255, 0.55); }
+input::placeholder { color: rgba(255, 255, 255, 0.45); }
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.5; }
+
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

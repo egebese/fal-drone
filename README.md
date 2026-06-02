@@ -6,6 +6,15 @@ entirely by [fal.ai](https://fal.ai), with your own API key (BYOK).
 Upload a still, press send, and the app sketches a camera flight path, reads it,
 writes the motion, and animates your photo into a continuous aerial shot.
 
+## Demo
+
+An example drone shot produced by the pipeline (also used as the landing
+background):
+
+<video src="https://github.com/egebese/fal-drone/raw/main/public/hero.mp4" controls muted loop playsinline width="100%"></video>
+
+[![Drone shot preview](public/hero-poster.jpg)](public/hero.mp4)
+
 ## Pipeline
 
 | Step | Model (fal) | What it does |
@@ -54,3 +63,7 @@ npm run build       # production build
 - `@fal-ai/client` for storage + queue (client-side only)
 - HTML canvas for the flight-path rendering (Catmull-Rom smoothed strokes)
 - `lucide-react` icons · liquid-glass UI
+
+## License
+
+[MIT](./LICENSE) — free to use, modify, and distribute, for any purpose.

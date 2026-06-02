@@ -119,8 +119,19 @@ export function PromptBar(p: Props) {
       )}
 
       <div className="lg-dark rounded-[26px] px-4 pt-3 pb-2.5">
-        {/* Top row: model + settings button (model selector hidden — only one model exposed) */}
-        <div className="mb-2.5 flex items-center justify-end">
+        {/* Top row: powered-by credit on the left, model + settings button on the right */}
+        <div className="mb-2.5 flex items-center justify-between">
+          <span className="pl-1 text-[11px] font-medium tracking-tight text-white/40">
+            Powered by{" "}
+            <a
+              href="https://fal.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/60 transition hover:text-white/90"
+            >
+              fal.ai
+            </a>
+          </span>
           <button
             type="button"
             onClick={() => setSettingsOpen((v) => !v)}

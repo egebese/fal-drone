@@ -319,14 +319,52 @@ export default function Page() {
 
   const hasImage = !!baseUrl && !!bgUrl;
 
+  // Defer mounting the hero background video until the page is interactive so
+  // it never blocks first paint (the poster shows instantly). Only relevant on
+  // the empty state, so we also drop it once an image is attached.
+  const [heroVideo, setHeroVideo] = useState(false);
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (w.requestIdleCallback && w.cancelIdleCallback) {
+      const id = w.requestIdleCallback(() => setHeroVideo(true));
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(() => setHeroVideo(true), 400);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <main
-      className="flex h-screen w-screen flex-col overflow-hidden bg-[#050505]"
+      className="relative flex h-screen w-screen flex-col overflow-hidden bg-[#050505]"
       onDragEnter={onDragEnter}
       onDragOver={(e) => e.preventDefault()}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
+      {!hasImage && (
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden fade-in">
+          {heroVideo && (
+            <video
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="none"
+              poster="/hero-poster.jpg"
+            >
+              <source src="/hero.mp4" type="video/mp4" />
+            </video>
+          )}
+          {/* Slight overlay so the hero copy stays legible over the footage */}
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/70 via-[#050505]/25 to-[#050505]/85" />
+        </div>
+      )}
+
       <TopBar
         onSignIn={() => setSettingsOpen(true)}
         onReset={reset}
@@ -336,7 +374,7 @@ export default function Page() {
       />
 
       {/* Stage — fills the space above the prompt bar */}
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-5 pb-2 pt-[76px]">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-5 pb-2 pt-[76px]">
         {!hasImage ? (
           <div className="flex flex-col items-center gap-4 text-center fade-in">
             <span className="lg-pill flex h-16 w-16 items-center justify-center rounded-2xl">
@@ -366,7 +404,7 @@ export default function Page() {
         )}
       </div>
 
-      <div className="px-5 pb-5">
+      <div className="relative z-10 px-5 pb-5">
         <PromptBar
           hasKey={keyPresent}
           onRequestKey={() => setSettingsOpen(true)}
